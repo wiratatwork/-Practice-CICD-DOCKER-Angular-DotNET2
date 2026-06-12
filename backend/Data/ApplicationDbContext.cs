@@ -10,17 +10,23 @@ namespace backend.Data
         {
         }
 
-        public DbSet<Item> Items { get; set; }
+        public DbSet<MachineStatus> MachineStatuses { get; set; }
+        public DbSet<Machine> Machines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Seed data
-            modelBuilder.Entity<Item>().HasData(
-                new Item { Id = 1, Name = "Item 1", Description = "Demo Item 1" },
-                new Item { Id = 2, Name = "Item 2", Description = "Demo Item 2" }
-            );
+            // Configure Machine -> MachineStatus relationship
+            modelBuilder.Entity<Machine>()
+                .HasOne(m => m.Status)
+                .WithMany(s => s.Machines)
+                .HasForeignKey(m => m.StatusId);
+
+            // Unique constraint on StatusName
+            modelBuilder.Entity<MachineStatus>()
+                .HasIndex(s => s.StatusName)
+                .IsUnique();
         }
     }
 }
