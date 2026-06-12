@@ -6,6 +6,12 @@
         {{ error }}
     </div>
 
+    <!-- Search Bar -->
+    <div class="search-section">
+        <input type="text" [(ngModel)]="searchQuery" (keyup)="searchMachines()" placeholder="Search by Machine Name..."
+            class="search-input" />
+    </div>
+
     <!-- Loading State -->
     <div *ngIf="loading" class="loading">
         Loading machines...
@@ -56,25 +62,36 @@
 
         <div class="form-group">
             <label for="machineName">Machine Name *</label>
-            <input type="text" id="machineName" [(ngModel)]="formData.machineName" placeholder="Enter machine name" />
+            <input type="text" id="machineName" [(ngModel)]="formData.machineName" placeholder="Enter machine name"
+                [class.error]="formErrors['machineName']" />
+            <span *ngIf="formErrors['machineName']" class="error-text">
+                {{ formErrors['machineName'] }}
+            </span>
         </div>
 
         <div class="form-group">
-            <label for="machineType">Machine Type</label>
+            <label for="machineType">Machine Type *</label>
             <input type="text" id="machineType" [(ngModel)]="formData.machineType"
-                placeholder="e.g., CNC, Conveyor, Robot" />
+                placeholder="e.g., CNC, Conveyor, Robot" [class.error]="formErrors['machineType']" />
+            <span *ngIf="formErrors['machineType']" class="error-text">
+                {{ formErrors['machineType'] }}
+            </span>
         </div>
 
         <div class="form-group">
-            <label for="location">Location</label>
-            <input type="text" id="location" [(ngModel)]="formData.location" placeholder="e.g., Zone 1" />
+            <label for="location">Location *</label>
+            <input type="text" id="location" [(ngModel)]="formData.location" placeholder="e.g., Zone 1"
+                [class.error]="formErrors['location']" />
+            <span *ngIf="formErrors['location']" class="error-text">
+                {{ formErrors['location'] }}
+            </span>
         </div>
 
         <div class="form-group">
             <label for="statusId">Status *</label>
             <select id="statusId" [(ngModel)]="formData.statusId">
-                <option *ngFor="let status of machineStatuses" [value]="status.id">
-                    {{ status.name }}
+                <option *ngFor="let status of machineStatuses" [value]="status.statusId">
+                    {{ status.statusName }}
                 </option>
             </select>
         </div>

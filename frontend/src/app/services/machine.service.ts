@@ -13,16 +13,21 @@ export interface Machine {
 
 export interface CreateMachineRequest {
     machineName: string;
-    machineType?: string;
-    location?: string;
+    machineType: string;
+    location: string;
     statusId: number;
 }
 
 export interface UpdateMachineRequest {
     machineName: string;
-    machineType?: string;
-    location?: string;
+    machineType: string;
+    location: string;
     statusId: number;
+}
+
+export interface MachineStatus {
+    statusId: number;
+    statusName: string;
 }
 
 @Injectable({
@@ -41,6 +46,12 @@ export class MachineService {
         return this.http.get<Machine>(`${this.apiUrl}/${id}`);
     }
 
+    searchMachines(name: string): Observable<Machine[]> {
+        return this.http.get<Machine[]>(`${this.apiUrl}/search`, {
+            params: { name }
+        });
+    }
+
     createMachine(request: CreateMachineRequest): Observable<Machine> {
         return this.http.post<Machine>(this.apiUrl, request);
     }
@@ -51,5 +62,9 @@ export class MachineService {
 
     deleteMachine(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    getMachineStatuses(): Observable<MachineStatus[]> {
+        return this.http.get<MachineStatus[]>(`${this.apiUrl}/statuses`);
     }
 }

@@ -23,6 +23,11 @@ namespace backend.Data
                 .WithMany(s => s.Machines)
                 .HasForeignKey(m => m.StatusId);
 
+            // Unique constraint on MachineName
+            modelBuilder.Entity<Machine>()
+                .HasIndex(m => m.MachineName)
+                .IsUnique();
+
             // Unique constraint on StatusName
             modelBuilder.Entity<MachineStatus>()
                 .HasIndex(s => s.StatusName)

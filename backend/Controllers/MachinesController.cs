@@ -35,6 +35,31 @@ namespace backend.Controllers
             return machines;
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<object>>> SearchMachines([FromQuery] string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return await GetMachines();
+            }
+
+            var machines = await _context.Machines
+                .Include(m => m.Status)
+                .Where(m => m.MachineName.Contains(name))
+                .Select(m => new
+                {
+                    m.MachineId,
+                    m.MachineName,
+                    m.MachineType,
+                    m.Location,
+                    m.StatusId,
+                    StatusName = m.Status!.StatusName
+                })
+                .ToListAsync();
+
+            return machines;
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<object>> GetMachine(int id)
         {
@@ -61,10 +86,26 @@ namespace backend.Controllers
         [HttpPost]
         public async Task<ActionResult<Machine>> CreateMachine(CreateMachineRequest request)
         {
+            // Validate all required fields
+            if (string.IsNullOrWhiteSpace(request.MachineName))
+                return BadRequest(new { error = "Machine Name is required" });
+
+            if (string.IsNullOrWhiteSpace(request.MachineType))
+                return BadRequest(new { error = "Machine Type is required" });
+
+            if (string.IsNullOrWhiteSpace(request.Location))
+                return BadRequest(new { error = "Location is required" });
+
+            // Check for duplicate MachineName
+            var existingMachine = await _context.Machines
+                .AnyAsync(m => m.MachineName == request.MachineName);
+            if (existingMachine)
+                return BadRequest(new { error = "Machine Name already exists" });
+
             // Validate StatusId exists
             var statusExists = await _context.MachineStatuses.AnyAsync(s => s.StatusId == request.StatusId);
             if (!statusExists)
-                return BadRequest("Invalid StatusId");
+                return BadRequest(new { error = "Invalid StatusId" });
 
             var machine = new Machine
             {
@@ -87,12 +128,31 @@ namespace backend.Controllers
             if (machine == null)
                 return NotFound();
 
+            // Validate all required fields
+            if (string.IsNullOrWhiteSpace(request.MachineName))
+                return BadRequest(new { error = "Machine Name is required" });
+
+            if (string.IsNullOrWhiteSpace(request.MachineType))
+                return BadRequest(new { error = "Machine Type is required" });
+
+            if (string.IsNullOrWhiteSpace(request.Location))
+                return BadRequest(new { error = "Location is required" });
+
+            // Check for duplicate MachineName (excluding current machine)
+            if (request.MachineName != machine.MachineName)
+            {
+                var duplicateMachine = await _context.Machines
+                    .AnyAsync(m => m.MachineName == request.MachineName);
+                if (duplicateMachine)
+                    return BadRequest(new { error = "Machine Name already exists" });
+            }
+
             // Validate StatusId if changed
             if (request.StatusId != machine.StatusId)
             {
                 var statusExists = await _context.MachineStatuses.AnyAsync(s => s.StatusId == request.StatusId);
                 if (!statusExists)
-                    return BadRequest("Invalid StatusId");
+                    return BadRequest(new { error = "Invalid StatusId" });
             }
 
             machine.MachineName = request.MachineName;
@@ -118,21 +178,36 @@ namespace backend.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("statuses")]
+        public async Task<ActionResult<IEnumerable<object>>> GetMachineStatuses()
+        {
+            var statuses = await _context.MachineStatuses
+                .OrderBy(s => s.StatusId)
+                .Select(s => new
+                {
+                    s.StatusId,
+                    s.StatusName
+                })
+                .ToListAsync();
+
+            return statuses;
+        }
     }
 
     public class CreateMachineRequest
     {
         public required string MachineName { get; set; }
-        public string? MachineType { get; set; }
-        public string? Location { get; set; }
+        public required string MachineType { get; set; }
+        public required string Location { get; set; }
         public int StatusId { get; set; }
     }
 
     public class UpdateMachineRequest
     {
         public required string MachineName { get; set; }
-        public string? MachineType { get; set; }
-        public string? Location { get; set; }
+        public required string MachineType { get; set; }
+        public required string Location { get; set; }
         public int StatusId { get; set; }
     }
 }

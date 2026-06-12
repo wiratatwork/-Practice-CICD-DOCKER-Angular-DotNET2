@@ -24,6 +24,35 @@ h2 {
     border: 1px solid #f5c6cb;
 }
 
+/* Error Text in Form */
+.error-text {
+    color: #dc3545;
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Search Section */
+.search-section {
+    margin-bottom: 20px;
+}
+
+.search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
 /* Loading State */
 .loading {
     text-align: center;
@@ -199,11 +228,22 @@ tbody tr:hover {
     box-sizing: border-box;
 }
 
+.form-group input.error,
+.form-group select.error {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.form-group input.error:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.25);
 }
 
 .form-actions {
